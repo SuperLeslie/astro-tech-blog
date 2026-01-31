@@ -1,0 +1,36 @@
+---
+// 从 WordPress API 获取文章数据来调试 slug
+const response = await fetch('https://wordpress-1562921-6179732.cloudwaysapps.com/wp-json/wp/v2/posts?_embed');
+const posts = await response.json();
+
+console.log('=== WordPress Posts Debug ===');
+posts.forEach((post, index) => {
+  console.log(`Post ${index + 1}:`);
+  console.log(`  ID: ${post.id}`);
+  console.log(`  Title: ${post.title.rendered}`);
+  console.log(`  Slug: ${post.slug}`);
+  console.log('---');
+});
+---
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug Posts</title>
+</head>
+<body>
+    <h1>Check Console for Post Data</h1>
+    <p>Posts data has been logged to the browser console.</p>
+    
+    <h2>Posts List:</h2>
+    <ul>
+        {posts.map((post) => (
+            <li>
+                <strong>Title:</strong> {post.title.rendered} <br />
+                <strong>Slug:</strong> {post.slug} <br />
+                <strong>URL:</strong> /blog/{post.slug}
+            </li>
+        ))}
+    </ul>
+</body>
+</html>

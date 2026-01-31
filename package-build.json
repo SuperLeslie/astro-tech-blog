@@ -1,0 +1,16 @@
+{
+  "scripts": {
+    "dev": "astro dev",
+    "start": "astro dev",
+    "build": "astro build",
+    "build:analyze": "astro build && npx astro preview",
+    "preview": "astro preview",
+    "astro": "astro",
+    "build:prod": "NODE_ENV=production astro build --experimental-static-build",
+    "optimize": "npm run build && npm run analyze-bundle",
+    "analyze-bundle": "npx webpack-bundle-analyzer dist/assets/*.js"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

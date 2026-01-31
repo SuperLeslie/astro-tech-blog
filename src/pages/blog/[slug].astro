@@ -1,0 +1,321 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import '../../styles/global.css';
+import { WordPressCache, type CachedPost } from '../../utils/wordpress-cache';
+
+export async function getStaticPaths() {
+  // 使用缓存获取文章列表，只获取必要的字段
+  const posts = await WordPressCache.getAllPosts();
+  
+  return posts.map((post) => ({
+    params: { slug: decodeURIComponent(post.slug) },
+    props: { postId: post.id },
+  }));
+}
+
+interface Props {
+  postId: number;
+}
+
+const { postId } = Astro.props;
+
+// 使用缓存获取完整的文章内容
+const post: CachedPost = await WordPressCache.getPost(postId);
+
+// 格式化日期
+const formattedDate = new Date(post.date).toLocaleDateString('zh-CN', {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric'
+});
+
+const featuredImage = post._embedded?.['wp:featuredmedia']?.[0]?.source_url;
+const authorName = post._embedded?.author?.[0]?.name || '匿名作者';
+---
+
+<Layout>
+  <main class="min-h-screen bg-gray-50">
+    <!-- Header -->
+    <header class="bg-white shadow-sm">
+      <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <nav class="flex items-center space-x-4">
+          <a href="/" class="text-gray-600 hover:text-indigo-600 transition-colors flex items-center">
+            <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+            </svg>
+            首页
+          </a>
+          <span class="text-gray-300">/</span>
+          <a href="/blog" class="text-gray-600 hover:text-indigo-600 transition-colors">
+            博客
+          </a>
+          <span class="text-gray-300">/</span>
+          <span class="text-gray-900 font-medium truncate max-w-xs" set:html={post.title.rendered}></span>
+        </nav>
+      </div>
+    </header>
+
+    <!-- Article -->
+    <article class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <!-- Featured Image -->
+      {featuredImage && (
+        <div class="mb-8 rounded-2xl overflow-hidden shadow-lg">
+          <img 
+            src={featuredImage} 
+            alt={post.title.rendered}
+            class="w-full h-64 md:h-96 object-cover"
+            loading="eager"
+            decoding="async"
+            width="800"
+            height="400"
+            fetchpriority="high"
+          />
+        </div>
+      )}
+
+      <!-- Article Header -->
+      <header class="mb-8">
+        <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4 leading-tight" set:html={post.title.rendered}></h1>
+        <div class="flex items-center space-x-4 text-gray-600">
+          <div class="flex items-center">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+            </svg>
+            <time>{formattedDate}</time>
+          </div>
+          <div class="flex items-center">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+            </svg>
+            <span>{authorName}</span>
+          </div>
+        </div>
+      </header>
+
+      <!-- Article Content -->
+      <div 
+        class="prose prose-base max-w-none prose-headings:text-gray-900 prose-p:text-gray-700 prose-a:text-indigo-600 prose-a:no-underline hover:prose-a:underline prose-img:rounded-lg prose-img:shadow-md article-content"
+        set:html={post.content.rendered}
+      />
+
+      <!-- Back Button -->
+      <div class="mt-12 pt-8 border-t border-gray-200">
+        <a 
+          href="/blog" 
+          class="inline-flex items-center px-6 py-3 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 transition-colors duration-200"
+        >
+          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+          </svg>
+          返回博客列表
+        </a>
+      </div>
+    </article>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-gray-200 mt-12">
+      <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <p class="text-center text-gray-500">© 2026 我的博客. All rights reserved.</p>
+      </div>
+    </footer>
+  </main>
+</Layout>
+
+<style is:global>
+  /* WordPress 内容样式优化 */
+  .article-content {
+    font-size: 1.125rem;
+    line-height: 1.75;
+    color: #374151;
+  }
+  
+  .article-content p {
+    margin-bottom: 1rem !important;
+    margin-top: 0 !important;
+  }
+  
+  .article-content h1,
+  .article-content h2,
+  .article-content h3,
+  .article-content h4,
+  .article-content h5,
+  .article-content h6 {
+    margin-top: 2rem !important;
+    margin-bottom: 1rem !important;
+    color: #111827 !important;
+    font-weight: 600;
+  }
+  
+  .article-content h2 {
+    font-size: 1.5rem;
+    border-bottom: 2px solid #e5e7eb;
+    padding-bottom: 0.5rem;
+  }
+  
+  .article-content h3 {
+    font-size: 1.25rem;
+  }
+  
+  .article-content img {
+    margin: 1.5rem auto;
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  }
+  
+  .article-content figure {
+    margin: 1.5rem 0;
+  }
+  
+  .article-content figcaption {
+    text-align: center;
+    color: #6b7280;
+    font-size: 0.875rem;
+    margin-top: 0.5rem;
+    font-style: italic;
+  }
+  
+  .article-content blockquote {
+    border-left: 4px solid #6366f1;
+    background-color: #f8fafc;
+    padding: 1rem 1.5rem;
+    margin: 1.5rem 0;
+    border-radius: 0 0.375rem 0.375rem 0;
+    font-style: italic;
+  }
+  
+  .article-content blockquote p {
+    margin: 0 !important;
+    color: #4b5563;
+  }
+  
+  .article-content ul,
+  .article-content ol {
+    margin: 1rem 0;
+    padding-left: 1.5rem;
+  }
+  
+  .article-content li {
+    margin-bottom: 0.5rem;
+  }
+  
+  .article-content code {
+    background-color: #f3f4f6;
+    padding: 0.125rem 0.375rem;
+    border-radius: 0.25rem;
+    font-size: 0.9em;
+    color: #dc2626;
+    font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+  }
+  
+  .article-content pre {
+    background-color: #1f2937;
+    color: #f9fafb;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    overflow-x: auto;
+    margin: 1.5rem 0;
+    line-height: 1.5;
+  }
+  
+  .article-content pre code {
+    background-color: transparent;
+    padding: 0;
+    color: inherit;
+    border-radius: 0;
+  }
+  
+  .article-content a {
+    color: #6366f1;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s ease;
+  }
+  
+  .article-content a:hover {
+    color: #4f46e5;
+    text-decoration: underline;
+  }
+  
+  .article-content table {
+    width: 100%;
+    margin: 1.5rem 0;
+    border-collapse: collapse;
+  }
+  
+  .article-content th,
+  .article-content td {
+    padding: 0.75rem;
+    border: 1px solid #e5e7eb;
+    text-align: left;
+  }
+  
+  .article-content th {
+    background-color: #f9fafb;
+    font-weight: 600;
+  }
+  
+  .article-content hr {
+    margin: 2rem 0;
+    border: none;
+    border-top: 2px solid #e5e7eb;
+  }
+  
+  /* WordPress Gallery 样式 */
+  .article-content .wp-block-gallery {
+    display: flex !important;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin: 2rem 0;
+    justify-content: flex-start;
+  }
+  
+  .article-content .wp-block-gallery.is-layout-flex {
+    flex-direction: row !important;
+  }
+  
+  .article-content .wp-block-gallery .wp-block-image {
+    flex: 0 0 auto;
+    margin: 0 !important;
+    max-width: 300px;
+    width: calc(33.333% - 0.667rem);
+  }
+  
+  .article-content .wp-block-gallery .wp-block-image img {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease;
+  }
+  
+  .article-content .wp-block-gallery .wp-block-image img:hover {
+    transform: scale(1.05);
+  }
+  
+  /* 响应式画廊 */
+  @media (max-width: 768px) {
+    .article-content .wp-block-gallery {
+      justify-content: flex-start;
+    }
+    
+    .article-content .wp-block-gallery .wp-block-image {
+      width: calc(50% - 0.5rem);
+      max-width: none;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .article-content .wp-block-gallery .wp-block-image {
+      width: 100%;
+      max-width: none;
+    }
+  }
+  
+  @media (min-width: 769px) and (max-width: 1024px) {
+    .article-content .wp-block-gallery .wp-block-image {
+      width: calc(50% - 0.5rem);
+      max-width: none;
+    }
+  }
+</style>

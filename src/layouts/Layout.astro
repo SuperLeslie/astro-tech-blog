@@ -1,15 +1,58 @@
 <!doctype html>
-<html lang="en">
+<html lang="zh-CN">
 	<head>
 		<meta charset="UTF-8" />
-		<meta name="viewport" content="width=device-width" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		
+		<!-- 性能优化 -->
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://wordpress-1562921-6179732.cloudwaysapps.com" />
+		<link rel="dns-prefetch" href="//wordpress-1562921-6179732.cloudwaysapps.com" />
+		
+		<!-- 图标 -->
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<link rel="icon" href="/favicon.ico" />
+		
+		<!-- SEO 基础 -->
 		<meta name="generator" content={Astro.generator} />
-		<title>Astro Basics</title>
+		<meta name="description" content="专业的技术博客，分享前端开发、后端技术和编程最佳实践" />
+		<meta name="keywords" content="技术博客,前端开发,JavaScript,React,Vue,Node.js,编程教程" />
+		<meta name="author" content="TechBlog" />
+		
+		<!-- Open Graph / Facebook -->
+		<meta property="og:type" content="website" />
+		<meta property="og:site_name" content="TechBlog" />
+		<meta property="og:locale" content="zh_CN" />
+		
+		<!-- Twitter -->
+		<meta name="twitter:card" content="summary_large_image" />
+		
+		<title>TechBlog - 技术分享与开发心得</title>
 	</head>
 	<body>
 		<slot />
+		
+		<!-- 性能监控 -->
+		<script>
+			// 性能监控
+			if ('performance' in window) {
+				window.addEventListener('load', () => {
+					setTimeout(() => {
+						const perfData = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming;
+						const loadTime = perfData.loadEventEnd - perfData.loadEventStart;
+						console.log('页面加载时间:', loadTime + 'ms');
+						
+						// 统计首次内容绘制时间
+						const paintEntries = performance.getEntriesByType('paint');
+						paintEntries.forEach(entry => {
+							if (entry.name === 'first-contentful-paint') {
+								console.log('首次内容绘制时间:', entry.startTime + 'ms');
+							}
+						});
+					}, 0);
+				});
+			}
+		</script>
 	</body>
 </html>
 

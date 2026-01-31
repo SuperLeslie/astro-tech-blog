@@ -1,0 +1,274 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import BlogCard from '../../components/BlogCard.astro';
+import '../../styles/global.css';
+import { WordPressCache, type CachedPost } from '../../utils/wordpress-cache';
+
+// 使用缓存获取文章数据，提升性能
+const posts: CachedPost[] = await WordPressCache.getPostsList();
+---
+
+<Layout>
+  <main class="min-h-screen bg-gray-50">
+    <!-- Header Navigation -->
+    <header class="bg-white shadow-sm border-b">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between items-center py-4">
+          <div class="flex items-center">
+            <a href="/" class="text-2xl font-bold text-gray-900 hover:text-indigo-600 transition-colors">
+              TechBlog
+            </a>
+          </div>
+          <nav class="hidden md:flex space-x-8">
+            <a href="/" class="text-gray-600 hover:text-indigo-600 transition-colors font-medium">首页</a>
+            <a href="/blog" class="text-indigo-600 font-medium">博客</a>
+            <a href="#" class="text-gray-600 hover:text-indigo-600 transition-colors font-medium">分类</a>
+            <a href="#" class="text-gray-600 hover:text-indigo-600 transition-colors font-medium">关于</a>
+            <a href="#" class="text-gray-600 hover:text-indigo-600 transition-colors font-medium">联系</a>
+          </nav>
+          <div class="flex items-center space-x-4">
+            <button class="text-gray-600 hover:text-indigo-600 transition-colors">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+              </svg>
+            </button>
+            <button class="md:hidden text-gray-600">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="bg-linear-to-br from-indigo-900 via-indigo-800 to-purple-800 text-white">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div class="text-center">
+          <h1 class="text-3xl md:text-4xl font-bold mb-4">
+            外贸wordpress建站分享和心得
+          </h1>
+          <p class="text-lg md:text-xl text-indigo-200 mb-6 max-w-2xl mx-auto">
+            探索前端技术、后端架构、开发工具和编程最佳实践
+          </p>
+          <div class="flex flex-wrap justify-center gap-3 text-sm">
+            <span class="bg-white/20 px-3 py-1 rounded-full">🚀 前端开发</span>
+            <span class="bg-white/20 px-3 py-1 rounded-full">⚡ 全栈技术</span>
+            <span class="bg-white/20 px-3 py-1 rounded-full">🛠️ 开发工具</span>
+            <span class="bg-white/20 px-3 py-1 rounded-full">💡 最佳实践</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Navigation Breadcrumb -->
+    <section class="bg-white border-b">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+        <nav class="flex items-center space-x-2 text-sm">
+          <a href="/" class="text-gray-600 hover:text-indigo-600 transition-colors">
+            首页
+          </a>
+          <span class="text-gray-400">/</span>
+          <span class="text-gray-900 font-medium">博客</span>
+        </nav>
+      </div>
+    </section>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div class="lg:grid lg:grid-cols-12 lg:gap-12">
+        <!-- Main Content -->
+        <div class="lg:col-span-8">
+          <!-- Featured Post -->
+          {posts.length > 0 && (
+            <section class="mb-12">
+              <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center">
+                <span class="bg-indigo-600 text-white px-3 py-1 rounded-md text-sm font-medium mr-3">
+                  特色文章
+                </span>
+                <span class="h-px flex-1 bg-gray-200"></span>
+              </h2>
+              <div class="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
+                {posts[0]._embedded?.['wp:featuredmedia']?.[0]?.source_url && (
+                  <div class="h-64 md:h-80 overflow-hidden">
+                    <img 
+                      src={posts[0]._embedded?.['wp:featuredmedia']?.[0]?.source_url} 
+                      alt={posts[0].title.rendered}
+                      class="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+                    />
+                  </div>
+                )}
+                <div class="p-8">
+                  <div class="flex items-center mb-4">
+                    <span class="bg-indigo-100 text-indigo-800 px-3 py-1 rounded-full text-sm font-medium">
+                      最新发布
+                    </span>
+                    <span class="text-gray-500 text-sm ml-4">
+                      {new Date(posts[0].date).toLocaleDateString('zh-CN')}
+                    </span>
+                  </div>
+                  <h3 class="text-2xl md:text-3xl font-bold text-gray-900 mb-4 leading-tight" set:html={posts[0].title.rendered}></h3>
+                  <p class="text-gray-600 text-lg leading-relaxed mb-6" set:html={posts[0].excerpt.rendered.replace(/<[^>]*>/g, '').slice(0, 200) + '...'}></p>
+                  <a 
+                    href={`/blog/${decodeURIComponent(posts[0].slug)}`}
+                    class="inline-flex items-center text-indigo-600 font-semibold hover:text-indigo-800 transition-colors"
+                  >
+                    继续阅读
+                    <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
+                    </svg>
+                  </a>
+                </div>
+              </div>
+            </section>
+          )}
+
+          <!-- Recent Posts Grid -->
+          <section class="mb-12">
+            <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center">
+              <span class="bg-gray-800 text-white px-3 py-1 rounded-md text-sm font-medium mr-3">
+                最新文章
+              </span>
+              <span class="h-px flex-1 bg-gray-200"></span>
+            </h2>
+            
+            {posts.length > 1 ? (
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                {posts.slice(1).map((post) => (
+                  <BlogCard
+                    id={post.id}
+                    slug={post.slug}
+                    title={post.title.rendered}
+                    excerpt={post.excerpt.rendered}
+                    date={post.date}
+                    featuredImage={post._embedded?.['wp:featuredmedia']?.[0]?.source_url}
+                  />
+                ))}
+              </div>
+            ) : (
+              <div class="text-center py-12 bg-white rounded-xl">
+                <p class="text-gray-500 text-lg">暂无更多文章</p>
+              </div>
+            )}
+          </section>
+        </div>
+
+        <!-- Sidebar -->
+        <aside class="lg:col-span-4">
+          <!-- About Widget -->
+          <div class="bg-white rounded-2xl shadow-lg p-8 mb-8">
+            <h3 class="text-xl font-bold text-gray-900 mb-4">关于博客</h3>
+            <div class="flex items-center mb-4">
+              <div class="w-12 h-12 bg-linear-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                技
+              </div>
+              <div class="ml-4">
+                <h4 class="font-semibold text-gray-900">技术分享平台</h4>
+                <p class="text-gray-600 text-sm">专注于现代Web开发</p>
+              </div>
+            </div>
+            <p class="text-gray-600 text-sm leading-relaxed">
+              分享前端技术、后端开发、DevOps实践和编程心得。致力于为开发者提供实用的技术内容和最佳实践。
+            </p>
+          </div>
+
+          <!-- Stats Widget -->
+          <div class="bg-white rounded-2xl shadow-lg p-8 mb-8">
+            <h3 class="text-xl font-bold text-gray-900 mb-6">博客统计</h3>
+            <div class="grid grid-cols-2 gap-4">
+              <div class="text-center p-4 bg-indigo-50 rounded-xl">
+                <div class="text-2xl font-bold text-indigo-600">{posts.length}</div>
+                <div class="text-sm text-gray-600">篇文章</div>
+              </div>
+              <div class="text-center p-4 bg-purple-50 rounded-xl">
+                <div class="text-2xl font-bold text-purple-600">∞</div>
+                <div class="text-sm text-gray-600">次阅读</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Popular Topics -->
+          <div class="bg-white rounded-2xl shadow-lg p-8 mb-8">
+            <h3 class="text-xl font-bold text-gray-900 mb-6">热门话题</h3>
+            <div class="flex flex-wrap gap-2">
+              <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium hover:bg-blue-200 transition-colors cursor-pointer">
+                React
+              </span>
+              <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium hover:bg-green-200 transition-colors cursor-pointer">
+                Vue.js
+              </span>
+              <span class="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm font-medium hover:bg-yellow-200 transition-colors cursor-pointer">
+                JavaScript
+              </span>
+              <span class="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm font-medium hover:bg-purple-200 transition-colors cursor-pointer">
+                TypeScript
+              </span>
+              <span class="bg-pink-100 text-pink-800 px-3 py-1 rounded-full text-sm font-medium hover:bg-pink-200 transition-colors cursor-pointer">
+                CSS
+              </span>
+              <span class="bg-indigo-100 text-indigo-800 px-3 py-1 rounded-full text-sm font-medium hover:bg-indigo-200 transition-colors cursor-pointer">
+                Node.js
+              </span>
+              <span class="bg-gray-100 text-gray-800 px-3 py-1 rounded-full text-sm font-medium hover:bg-gray-200 transition-colors cursor-pointer">
+                DevOps
+              </span>
+            </div>
+          </div>
+
+          <!-- Newsletter Signup -->
+          <div class="bg-linear-to-br from-indigo-500 to-purple-600 rounded-2xl shadow-lg p-8 text-white">
+            <h3 class="text-xl font-bold mb-4">订阅更新</h3>
+            <p class="text-indigo-100 text-sm mb-6">
+              获取最新的技术文章和开发资源，直接发送到你的邮箱。
+            </p>
+            <div class="space-y-4">
+              <input 
+                type="email" 
+                placeholder="输入你的邮箱地址"
+                class="w-full px-4 py-3 rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-white/50"
+              />
+              <button class="w-full bg-white text-indigo-600 font-semibold py-3 px-4 rounded-lg hover:bg-gray-100 transition-colors">
+                立即订阅
+              </button>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white mt-20">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div>
+            <h3 class="text-xl font-bold mb-4">技术博客</h3>
+            <p class="text-gray-400 leading-relaxed">
+              专注于分享现代Web开发技术，帮助开发者成长和学习。
+            </p>
+          </div>
+          <div>
+            <h4 class="font-semibold mb-4">快速链接</h4>
+            <ul class="space-y-2 text-gray-400">
+              <li><a href="/" class="hover:text-white transition-colors">首页</a></li>
+              <li><a href="/blog" class="hover:text-white transition-colors">博客</a></li>
+              <li><a href="#" class="hover:text-white transition-colors">关于</a></li>
+              <li><a href="#" class="hover:text-white transition-colors">联系</a></li>
+            </ul>
+          </div>
+          <div>
+            <h4 class="font-semibold mb-4">技术栈</h4>
+            <ul class="space-y-2 text-gray-400">
+              <li>Frontend: React, Vue, Astro</li>
+              <li>Backend: Node.js, Python</li>
+              <li>Styling: Tailwind CSS</li>
+              <li>CMS: WordPress API</li>
+            </ul>
+          </div>
+        </div>
+        <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
+          <p>© 2026 技术博客. All rights reserved. Made with ❤️ and Astro</p>
+        </div>
+      </div>
+    </footer>
+  </main>
+</Layout>
