@@ -4,8 +4,6 @@ import tailwindcss from "@tailwindcss/vite";
 
 // https://astro.build/config
 export default defineConfig({
-  site: "https://superleslie.github.io",
-  base: "/astro-tech-blog",
   output: "static", // 确保静态生成
   build: {
     inlineStylesheets: "auto", // 内联关键 CSS
